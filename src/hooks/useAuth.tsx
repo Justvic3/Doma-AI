@@ -6,6 +6,7 @@ interface AuthContextType {
   user: User | null;
   session: Session | null;
   loading: boolean;
+  authLoading: boolean;
   signUp: (email: string, password: string, fullName: string) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<{ error: any }>;
@@ -17,6 +18,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(false);
 
   useEffect(() => {
     // Set up auth state listener
@@ -39,6 +41,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const signUp = async (email: string, password: string, fullName: string) => {
+    setAuthLoading(true);
     const redirectUrl = `${window.location.origin}/`;
     
     const { error } = await supabase.auth.signUp({
@@ -51,19 +54,24 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         },
       },
     });
+    setAuthLoading(false);
     return { error };
   };
 
   const signIn = async (email: string, password: string) => {
+    setAuthLoading(true);
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
     });
+    setAuthLoading(false);
     return { error };
   };
 
   const signOut = async () => {
+    setAuthLoading(true);
     const { error } = await supabase.auth.signOut();
+    setAuthLoading(false);
     return { error };
   };
 
@@ -71,6 +79,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     user,
     session,
     loading,
+    authLoading,
     signUp,
     signIn,
     signOut,

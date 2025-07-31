@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -15,7 +16,7 @@ const Auth = () => {
   const [fullName, setFullName] = useState('');
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { signIn, signUp, user } = useAuth();
+  const { signIn, signUp, user, authLoading } = useAuth();
 
   // Redirect if already authenticated
   useEffect(() => {
@@ -37,10 +38,16 @@ const Auth = () => {
         description: error.message,
       });
     } else {
-      toast({
+      const welcomeToast = toast({
         title: "Welcome back!",
         description: "You have been signed in successfully.",
       });
+      
+      // Fade out the welcome message after 2.5 seconds
+      setTimeout(() => {
+        welcomeToast.dismiss();
+      }, 2500);
+      
       navigate('/');
     }
 
@@ -93,7 +100,7 @@ const Auth = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    disabled={isLoading}
+                    disabled={isLoading || authLoading}
                   />
                 </div>
                 <div className="space-y-2">
@@ -104,11 +111,11 @@ const Auth = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    disabled={isLoading}
+                    disabled={isLoading || authLoading}
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? 'Signing in...' : 'Sign In'}
+                <Button type="submit" className="w-full" disabled={isLoading || authLoading}>
+                  {(isLoading || authLoading) ? 'Signing in...' : 'Sign In'}
                 </Button>
               </form>
             </TabsContent>
@@ -123,7 +130,7 @@ const Auth = () => {
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
                     required
-                    disabled={isLoading}
+                    disabled={isLoading || authLoading}
                   />
                 </div>
                 <div className="space-y-2">
@@ -134,7 +141,7 @@ const Auth = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     required
-                    disabled={isLoading}
+                    disabled={isLoading || authLoading}
                   />
                 </div>
                 <div className="space-y-2">
@@ -145,12 +152,12 @@ const Auth = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    disabled={isLoading}
+                    disabled={isLoading || authLoading}
                     minLength={6}
                   />
                 </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? 'Creating account...' : 'Sign Up'}
+                <Button type="submit" className="w-full" disabled={isLoading || authLoading}>
+                  {(isLoading || authLoading) ? 'Creating account...' : 'Sign Up'}
                 </Button>
               </form>
             </TabsContent>

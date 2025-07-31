@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Send, Paperclip, Mic } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { getRandomOilGasContent } from '@/utils/oilGasContent';
 
 interface Message {
   id: string;
@@ -10,10 +11,19 @@ interface Message {
   sender: 'user' | 'ai';
 }
 
+interface ChatHistory {
+  id: string;
+  title: string;
+  messages: Message[];
+  timestamp: Date;
+}
+
 export function ChatInterface() {
   const [message, setMessage] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [isNewChat, setIsNewChat] = useState(true);
+  const [chatHistory, setChatHistory] = useState<ChatHistory[]>([]);
+  const [currentContent, setCurrentContent] = useState(() => getRandomOilGasContent());
 
   const handleSend = () => {
     if (message.trim()) {
@@ -49,9 +59,36 @@ export function ChatInterface() {
   };
 
   const handleNewChat = () => {
+    // Save current chat to history if there are messages
+    if (messages.length > 0) {
+      const newChat: ChatHistory = {
+        id: Date.now().toString(),
+        title: messages[0]?.content.slice(0, 50) + (messages[0]?.content.length > 50 ? '...' : '') || 'New Chat',
+        messages: [...messages],
+        timestamp: new Date()
+      };
+      setChatHistory(prev => [newChat, ...prev]);
+    }
+    
     setMessages([]);
     setIsNewChat(true);
+    setCurrentContent(getRandomOilGasContent()); // Get new content variation
   };
+
+  const handleQuickPrompt = (promptText: string) => {
+    setMessage(promptText);
+    setTimeout(() => handleSend(), 100); // Small delay to ensure message is set
+  };
+
+  // Listen for new chat events from sidebar
+  useEffect(() => {
+    const handleNewChatEvent = () => {
+      handleNewChat();
+    };
+
+    window.addEventListener('newChat', handleNewChatEvent);
+    return () => window.removeEventListener('newChat', handleNewChatEvent);
+  }, [messages]);
 
   return (
     <main className="flex-1 flex flex-col h-screen">
@@ -59,30 +96,24 @@ export function ChatInterface() {
       <div className="flex-1 flex flex-col">
         {isNewChat && messages.length === 0 ? (
           <div className="flex-1 flex items-center justify-center p-8">
-            <div className="text-center max-w-2xl">
+              <div className="text-center max-w-2xl">
               <h1 className="text-4xl font-semibold mb-4 text-foreground">
-                Ready to optimize your field operations?
+                {currentContent.title}
               </h1>
               <p className="text-lg text-muted-foreground mb-8">
-                Get instant insights on drilling, production, safety protocols, and equipment maintenance.
+                {currentContent.description}
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                <div className="p-4 bg-muted rounded-lg">
-                  <h3 className="font-medium mb-2">Drilling Operations</h3>
-                  <p className="text-muted-foreground">Optimize drilling parameters and monitor wellbore conditions</p>
-                </div>
-                <div className="p-4 bg-muted rounded-lg">
-                  <h3 className="font-medium mb-2">Production Analysis</h3>
-                  <p className="text-muted-foreground">Analyze production data and identify optimization opportunities</p>
-                </div>
-                <div className="p-4 bg-muted rounded-lg">
-                  <h3 className="font-medium mb-2">Safety Protocols</h3>
-                  <p className="text-muted-foreground">Access HSE guidelines and safety procedures</p>
-                </div>
-                <div className="p-4 bg-muted rounded-lg">
-                  <h3 className="font-medium mb-2">Equipment Maintenance</h3>
-                  <p className="text-muted-foreground">Get maintenance schedules and troubleshooting guides</p>
-                </div>
+                {currentContent.prompts.map((prompt, index) => (
+                  <button 
+                    key={index}
+                    onClick={() => handleQuickPrompt(prompt.prompt)}
+                    className="p-4 bg-muted rounded-lg hover:bg-muted/80 transition-colors text-left"
+                  >
+                    <h3 className="font-medium mb-2">{prompt.title}</h3>
+                    <p className="text-muted-foreground">{prompt.description}</p>
+                  </button>
+                ))}
               </div>
             </div>
           </div>
@@ -115,7 +146,7 @@ export function ChatInterface() {
 
       {/* Chat input */}
       <div className={`p-6 border-t ${isNewChat ? 'flex justify-center' : ''}`}>
-        <div className={`${isNewChat ? 'max-w-2xl' : 'max-w-4xl mx-auto'}`}>
+        <div className={`${isNewChat ? 'max-w-3xl' : 'max-w-4xl mx-auto'}`}>
           <div className="relative flex items-center bg-muted rounded-lg border">
             <Button variant="ghost" size="sm" className="h-8 w-8 p-0 ml-3">
               <Mic className="h-4 w-4" />

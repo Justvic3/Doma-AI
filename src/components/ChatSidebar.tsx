@@ -16,7 +16,7 @@ import {
 import { Button } from '@/components/ui/button';
 
 export function ChatSidebar() {
-  const { signOut } = useAuth();
+  const { signOut, authLoading } = useAuth();
   const navigate = useNavigate();
 
   const handleSignOut = async () => {
@@ -25,22 +25,24 @@ export function ChatSidebar() {
   };
 
   return (
-    <Sidebar className="w-64 border-r">
+    <Sidebar className="w-56 border-r">
       <SidebarHeader className="p-4 flex flex-row items-center justify-between">
         <div className="flex-1" />
         <Button 
           variant="outline" 
           size="sm"
           onClick={handleSignOut}
+          disabled={authLoading}
           className="text-destructive hover:bg-destructive/10 border-destructive/20"
         >
-          <LogOut className="h-4 w-4" />
+          <LogOut className="h-4 w-4 mr-2" />
+          {authLoading ? 'Signing out...' : 'Sign Out'}
         </Button>
       </SidebarHeader>
 
       <SidebarContent>
         <div className="px-4 mb-4">
-          <Button variant="outline" className="w-full justify-start">
+          <Button variant="outline" className="w-full justify-start" onClick={() => window.dispatchEvent(new CustomEvent('newChat'))}>
             <MessageSquarePlus className="mr-2 h-4 w-4" />
             New chat
           </Button>
