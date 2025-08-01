@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { Send, Paperclip, Mic } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { FileUpload } from '@/components/FileUpload';
 import { getRandomOilGasContent } from '@/utils/oilGasContent';
 
 interface Message {
@@ -28,6 +30,8 @@ export function ChatInterface({ chatHistory, onChatHistoryUpdate }: ChatInterfac
   const [messages, setMessages] = useState<Message[]>([]);
   const [isNewChat, setIsNewChat] = useState(true);
   const [currentContent, setCurrentContent] = useState(() => getRandomOilGasContent());
+  const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
+  const [isFileDialogOpen, setIsFileDialogOpen] = useState(false);
 
   const handleSend = () => {
     if (message.trim()) {
@@ -76,9 +80,11 @@ export function ChatInterface({ chatHistory, onChatHistoryUpdate }: ChatInterfac
     return words.join(' ') + '...';
   };
 
+  const [currentChatId, setCurrentChatId] = useState<string | null>(null);
+
   const handleNewChat = () => {
-    // Save current chat to history if there are messages
-    if (messages.length > 0) {
+    // Save current chat to history if there are messages and it's not already in history
+    if (messages.length > 0 && !currentChatId) {
       const newChat: ChatHistory = {
         id: Date.now().toString(),
         title: generateChatTitle(messages),
@@ -90,12 +96,14 @@ export function ChatInterface({ chatHistory, onChatHistoryUpdate }: ChatInterfac
     
     setMessages([]);
     setIsNewChat(true);
+    setCurrentChatId(null);
     setCurrentContent(getRandomOilGasContent()); // Get new content variation
   };
 
   const handleLoadChat = (chat: ChatHistory) => {
     setMessages(chat.messages);
     setIsNewChat(false);
+    setCurrentChatId(chat.id);
   };
 
   const handleQuickPrompt = (promptText: string) => {
@@ -191,9 +199,27 @@ export function ChatInterface({ chatHistory, onChatHistoryUpdate }: ChatInterfac
               className="flex-1 border-0 bg-transparent px-4 py-3 focus-visible:ring-0"
             />
             <div className="flex items-center gap-2 pr-3">
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hidden md:flex">
-                <Paperclip className="h-4 w-4" />
-              </Button>
+              <Dialog open={isFileDialogOpen} onOpenChange={setIsFileDialogOpen}>
+                <DialogTrigger asChild>
+                  <Button variant="ghost" size="sm" className="h-8 w-8 p-0 hidden md:flex">
+                    <Paperclip className="h-4 w-4" />
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-md">
+                  <DialogHeader>
+                    <DialogTitle>Upload Files</DialogTitle>
+                  </DialogHeader>
+                  <FileUpload 
+                    onFilesChange={(files) => {
+                      setUploadedFiles(files);
+                      if (files.length > 0) {
+                        setIsFileDialogOpen(false);
+                      }
+                    }}
+                    maxSize={5}
+                  />
+                </DialogContent>
+              </Dialog>
               {message.trim() && (
                 <Button 
                   onClick={handleSend} 

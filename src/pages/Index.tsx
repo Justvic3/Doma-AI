@@ -5,6 +5,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { ChatSidebar } from '@/components/ChatSidebar';
 import { ChatInterface } from '@/components/ChatInterface';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 interface ChatHistory {
   id: string;
@@ -42,10 +43,17 @@ const Index = () => {
   return (
     <SidebarProvider defaultOpen={!isMobile}>
       <div className="min-h-screen flex w-full bg-background">
-        {isMobile && (
-          <header className="fixed top-0 left-0 right-0 z-50 h-12 flex items-center border-b bg-background px-4">
-            <SidebarTrigger />
-            <h1 className="ml-4 font-semibold">DOMA AI</h1>
+        {isMobile ? (
+          <header className="fixed top-0 left-0 right-0 z-50 h-12 flex items-center justify-between border-b bg-background px-4">
+            <div className="flex items-center">
+              <SidebarTrigger />
+              <h1 className="ml-4 font-semibold">DOMA AI</h1>
+            </div>
+            <ThemeToggle />
+          </header>
+        ) : (
+          <header className="fixed top-0 right-0 z-50 p-4">
+            <ThemeToggle />
           </header>
         )}
         <ChatSidebar chatHistory={chatHistory} />

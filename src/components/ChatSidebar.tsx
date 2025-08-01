@@ -32,10 +32,6 @@ export function ChatSidebar({ chatHistory = [] }: { chatHistory?: Array<{id: str
       <SidebarHeader className="p-4">
         {isMobile && <SidebarTrigger className="mb-4" />}
         <div className="space-y-2">
-          <Button variant="outline" className="w-full justify-start" onClick={() => window.dispatchEvent(new CustomEvent('newChat'))}>
-            <MessageSquarePlus className="mr-2 h-4 w-4" />
-            New chat
-          </Button>
           <Button 
             variant="outline" 
             onClick={handleSignOut}
@@ -44,6 +40,10 @@ export function ChatSidebar({ chatHistory = [] }: { chatHistory?: Array<{id: str
           >
             <LogOut className="h-4 w-4 mr-2" />
             {authLoading ? 'Signing out...' : 'Sign Out'}
+          </Button>
+          <Button variant="outline" className="w-full justify-start" onClick={() => window.dispatchEvent(new CustomEvent('newChat'))}>
+            <MessageSquarePlus className="mr-2 h-4 w-4" />
+            New chat
           </Button>
         </div>
       </SidebarHeader>
@@ -77,7 +77,10 @@ export function ChatSidebar({ chatHistory = [] }: { chatHistory?: Array<{id: str
       <SidebarFooter className="p-4">
         <SidebarMenu>
           <SidebarMenuItem>
-            <SidebarMenuButton className="w-full justify-start">
+            <SidebarMenuButton 
+              className="w-full justify-start"
+              onClick={() => navigate('/settings')}
+            >
               <Settings className="mr-2 h-4 w-4" />
               Settings
             </SidebarMenuButton>
