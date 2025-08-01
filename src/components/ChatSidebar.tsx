@@ -1,6 +1,7 @@
 import { MessageSquarePlus, Settings, User, LogOut } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
+import { useIsMobile } from '@/hooks/use-mobile';
 import {
   Sidebar,
   SidebarContent,
@@ -12,12 +13,14 @@ import {
   SidebarMenuItem,
   SidebarHeader,
   SidebarFooter,
+  SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
 
-export function ChatSidebar() {
+export function ChatSidebar({ chatHistory = [] }: { chatHistory?: Array<{id: string, title: string, messages: any[], timestamp: Date}> }) {
   const { signOut, authLoading } = useAuth();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   const handleSignOut = async () => {
     await signOut();
@@ -25,36 +28,47 @@ export function ChatSidebar() {
   };
 
   return (
-    <Sidebar className="w-56 border-r">
-      <SidebarHeader className="p-4 flex flex-row items-center justify-between">
-        <div className="flex-1" />
-        <Button 
-          variant="outline" 
-          size="sm"
-          onClick={handleSignOut}
-          disabled={authLoading}
-          className="text-destructive hover:bg-destructive/10 border-destructive/20"
-        >
-          <LogOut className="h-4 w-4 mr-2" />
-          {authLoading ? 'Signing out...' : 'Sign Out'}
-        </Button>
-      </SidebarHeader>
-
-      <SidebarContent>
-        <div className="px-4 mb-4">
+    <Sidebar className="w-56 border-r" collapsible={isMobile ? "offcanvas" : "icon"}>
+      <SidebarHeader className="p-4">
+        {isMobile && <SidebarTrigger className="mb-4" />}
+        <div className="space-y-2">
           <Button variant="outline" className="w-full justify-start" onClick={() => window.dispatchEvent(new CustomEvent('newChat'))}>
             <MessageSquarePlus className="mr-2 h-4 w-4" />
             New chat
           </Button>
+          <Button 
+            variant="outline" 
+            onClick={handleSignOut}
+            disabled={authLoading}
+            className="w-full justify-start text-destructive hover:bg-destructive/10 border-destructive/20"
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            {authLoading ? 'Signing out...' : 'Sign Out'}
+          </Button>
         </div>
+      </SidebarHeader>
 
+      <SidebarContent>
         <SidebarGroup>
           <SidebarGroupLabel>Chat History</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              <div className="px-3 py-2 text-sm text-muted-foreground">
-                No chat history yet. Start a conversation to see your chats here.
-              </div>
+              {chatHistory.length > 0 ? (
+                chatHistory.map((chat) => (
+                  <SidebarMenuItem key={chat.id}>
+                    <SidebarMenuButton 
+                      className="w-full justify-start text-left"
+                      onClick={() => window.dispatchEvent(new CustomEvent('loadChat', { detail: chat }))}
+                    >
+                      <span className="truncate">{chat.title}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))
+              ) : (
+                <div className="px-3 py-2 text-sm text-muted-foreground">
+                  No chat history yet. Start a conversation to see your chats here.
+                </div>
+              )}
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>

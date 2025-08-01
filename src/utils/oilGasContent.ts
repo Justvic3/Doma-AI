@@ -6,7 +6,7 @@ export interface QuickPrompt {
 
 export const oilGasContentVariations = [
   {
-    title: "Ready to optimize your field operations?",
+    title: "DOMA AI",
     description: "Get instant insights on drilling, production, safety protocols, and equipment maintenance.",
     prompts: [
       {
@@ -32,7 +32,7 @@ export const oilGasContentVariations = [
     ]
   },
   {
-    title: "Accelerate your upstream operations today?",
+    title: "DOMA AI",
     description: "Access expert knowledge on reservoir engineering, well completion, and production optimization.",
     prompts: [
       {
@@ -58,7 +58,7 @@ export const oilGasContentVariations = [
     ]
   },
   {
-    title: "Transform your downstream operations?",
+    title: "DOMA AI",
     description: "Get insights on refining processes, petrochemicals, and plant optimization.",
     prompts: [
       {
