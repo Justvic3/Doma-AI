@@ -112,7 +112,10 @@ export function ChatSidebar({
             </SidebarMenuButton>
           </SidebarMenuItem>
           <SidebarMenuItem>
-            <SidebarMenuButton className="w-full justify-start">
+            <SidebarMenuButton 
+              className="w-full justify-start"
+              onClick={() => navigate('/profile')}
+            >
               <User className="mr-2 h-4 w-4" />
               Profile
             </SidebarMenuButton>

@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { FileUpload } from '@/components/FileUpload';
+import { VoiceRecorder } from '@/components/VoiceRecorder';
 import { getRandomOilGasContent } from '@/utils/oilGasContent';
 
 interface Message {
@@ -42,7 +43,8 @@ export function ChatInterface({ chatHistory, onChatHistoryUpdate }: ChatInterfac
         sender: 'user'
       };
       
-      setMessages(prev => [...prev, newMessage]);
+      const updatedMessages = [...messages, newMessage];
+      setMessages(updatedMessages);
       setMessage('');
       setIsNewChat(false);
       
@@ -54,7 +56,18 @@ export function ChatInterface({ chatHistory, onChatHistoryUpdate }: ChatInterfac
           timestamp: new Date(),
           sender: 'ai'
         };
-        setMessages(prev => [...prev, aiResponse]);
+        const finalMessages = [...updatedMessages, aiResponse];
+        setMessages(finalMessages);
+        
+        // Update chat history if we're continuing an existing chat
+        if (currentChatId) {
+          const updatedHistory = chatHistory.map(chat => 
+            chat.id === currentChatId 
+              ? { ...chat, messages: finalMessages, timestamp: new Date() }
+              : chat
+          );
+          onChatHistoryUpdate(updatedHistory);
+        }
       }, 1000);
     }
   };
@@ -110,6 +123,10 @@ export function ChatInterface({ chatHistory, onChatHistoryUpdate }: ChatInterfac
   const handleQuickPrompt = (promptText: string) => {
     setMessage(promptText);
     setTimeout(() => handleSend(), 100); // Small delay to ensure message is set
+  };
+
+  const handleVoiceTranscription = (text: string) => {
+    setMessage(text);
   };
 
   const scrollToBottom = () => {
@@ -199,9 +216,9 @@ export function ChatInterface({ chatHistory, onChatHistoryUpdate }: ChatInterfac
       <div className={`p-4 md:p-6 border-t bg-background ${isNewChat ? 'flex justify-center' : ''}`}>
         <div className={`w-full ${isNewChat ? 'max-w-3xl' : 'max-w-4xl mx-auto'}`}>
           <div className="relative flex items-center bg-muted rounded-lg border">
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 ml-3 hidden md:flex">
-              <Mic className="h-4 w-4" />
-            </Button>
+            <div className="ml-3 hidden md:flex">
+              <VoiceRecorder onTranscription={handleVoiceTranscription} />
+            </div>
             <Input
               value={message}
               onChange={(e) => setMessage(e.target.value)}
