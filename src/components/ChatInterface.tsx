@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Send, Paperclip, Mic } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -81,6 +81,7 @@ export function ChatInterface({ chatHistory, onChatHistoryUpdate }: ChatInterfac
   };
 
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const handleNewChat = () => {
     // Save current chat to history if there are messages and it's not already in history
@@ -111,6 +112,15 @@ export function ChatInterface({ chatHistory, onChatHistoryUpdate }: ChatInterfac
     setTimeout(() => handleSend(), 100); // Small delay to ensure message is set
   };
 
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  // Auto-scroll when messages change
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
   // Listen for new chat and load chat events from sidebar
   useEffect(() => {
     const handleNewChatEvent = () => {
@@ -133,7 +143,7 @@ export function ChatInterface({ chatHistory, onChatHistoryUpdate }: ChatInterfac
   return (
     <main className="flex-1 flex flex-col h-screen overflow-hidden">
       {/* Main chat area */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col min-h-0">
         {isNewChat && messages.length === 0 ? (
           <div className="flex-1 flex items-center justify-center p-4 md:p-8">
             <div className="text-center max-w-2xl w-full px-4">
@@ -158,8 +168,8 @@ export function ChatInterface({ chatHistory, onChatHistoryUpdate }: ChatInterfac
             </div>
           </div>
         ) : (
-          <div className="flex-1 overflow-y-auto p-4 md:p-6">
-            <div className="max-w-4xl mx-auto space-y-4">
+          <div className="flex-1 overflow-y-auto p-4 md:p-6" style={{ scrollBehavior: 'smooth' }}>
+            <div className="max-w-4xl mx-auto space-y-4 pb-4">
               {messages.map((msg) => (
                 <div
                   key={msg.id}
@@ -179,13 +189,14 @@ export function ChatInterface({ chatHistory, onChatHistoryUpdate }: ChatInterfac
                   </div>
                 </div>
               ))}
+              <div ref={messagesEndRef} />
             </div>
           </div>
         )}
       </div>
 
       {/* Chat input */}
-      <div className={`p-4 md:p-6 border-t ${isNewChat ? 'flex justify-center' : ''}`}>
+      <div className={`p-4 md:p-6 border-t bg-background ${isNewChat ? 'flex justify-center' : ''}`}>
         <div className={`w-full ${isNewChat ? 'max-w-3xl' : 'max-w-4xl mx-auto'}`}>
           <div className="relative flex items-center bg-muted rounded-lg border">
             <Button variant="ghost" size="sm" className="h-8 w-8 p-0 ml-3 hidden md:flex">

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -6,19 +6,13 @@ import { SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { ChatSidebar } from '@/components/ChatSidebar';
 import { ChatInterface } from '@/components/ChatInterface';
 import { ThemeToggle } from '@/components/ThemeToggle';
-
-interface ChatHistory {
-  id: string;
-  title: string;
-  messages: any[];
-  timestamp: Date;
-}
+import { useChatHistory } from '@/hooks/useChatHistory';
 
 const Index = () => {
   const { user, loading } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
-  const [chatHistory, setChatHistory] = useState<ChatHistory[]>([]);
+  const { chatHistory, updateChatHistory, timeFilter, setTimeFilter } = useChatHistory();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -56,11 +50,15 @@ const Index = () => {
             <ThemeToggle />
           </header>
         )}
-        <ChatSidebar chatHistory={chatHistory} />
-        <div className={`flex-1 ${isMobile ? 'pt-12' : ''}`}>
+        <ChatSidebar 
+          chatHistory={chatHistory}
+          timeFilter={timeFilter}
+          onTimeFilterChange={setTimeFilter}
+        />
+        <div className={`flex-1 ${isMobile ? 'pt-12' : 'pr-16'}`}>
           <ChatInterface 
             chatHistory={chatHistory} 
-            onChatHistoryUpdate={setChatHistory}
+            onChatHistoryUpdate={updateChatHistory}
           />
         </div>
       </div>

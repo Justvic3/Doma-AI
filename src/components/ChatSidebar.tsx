@@ -1,4 +1,4 @@
-import { MessageSquarePlus, Settings, User, LogOut } from 'lucide-react';
+import { MessageSquarePlus, Settings, User, LogOut, Filter } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -16,8 +16,18 @@ import {
   SidebarTrigger,
 } from '@/components/ui/sidebar';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import type { TimeFilter } from '@/hooks/useChatHistory';
 
-export function ChatSidebar({ chatHistory = [] }: { chatHistory?: Array<{id: string, title: string, messages: any[], timestamp: Date}> }) {
+export function ChatSidebar({ 
+  chatHistory = [], 
+  timeFilter = 'all', 
+  onTimeFilterChange 
+}: { 
+  chatHistory?: Array<{id: string, title: string, messages: any[], timestamp: Date}>;
+  timeFilter?: TimeFilter;
+  onTimeFilterChange?: (filter: TimeFilter) => void;
+}) {
   const { signOut, authLoading } = useAuth();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
@@ -50,7 +60,23 @@ export function ChatSidebar({ chatHistory = [] }: { chatHistory?: Array<{id: str
 
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Chat History</SidebarGroupLabel>
+          <SidebarGroupLabel className="flex items-center justify-between">
+            <span>Chat History</span>
+            {onTimeFilterChange && (
+              <Select value={timeFilter} onValueChange={onTimeFilterChange}>
+                <SelectTrigger className="h-6 w-16 p-1 text-xs">
+                  <Filter className="h-3 w-3" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All</SelectItem>
+                  <SelectItem value="24h">24h</SelectItem>
+                  <SelectItem value="5d">5d</SelectItem>
+                  <SelectItem value="2w">2w</SelectItem>
+                  <SelectItem value="1m">1m</SelectItem>
+                </SelectContent>
+              </Select>
+            )}
+          </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {chatHistory.length > 0 ? (

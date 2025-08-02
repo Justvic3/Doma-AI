@@ -11,8 +11,6 @@ const settingsSections = [
   { id: 'general', label: 'General', icon: SettingsIcon },
   { id: 'notifications', label: 'Notifications', icon: Bell },
   { id: 'personalization', label: 'Personalization', icon: Palette },
-  { id: 'connected-apps', label: 'Connected apps', icon: Zap },
-  { id: 'data-controls', label: 'Data controls', icon: Smartphone },
   { id: 'security', label: 'Security', icon: Shield },
   { id: 'account', label: 'Account', icon: User },
 ]

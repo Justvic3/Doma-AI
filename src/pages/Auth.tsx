@@ -9,6 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { Skeleton } from '@/components/ui/skeleton';
+import authBackground from '@/assets/auth-background.jpg';
 
 const Auth = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -100,8 +101,17 @@ const Auth = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background p-4">
-      <Card className="w-full max-w-md">
+    <div 
+      className="min-h-screen flex items-center justify-center p-4 relative"
+      style={{
+        backgroundImage: `url(${authBackground})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat'
+      }}
+    >
+      <div className="absolute inset-0 bg-background/40 backdrop-blur-sm"></div>
+      <Card className="w-full max-w-md relative z-10 backdrop-blur-sm bg-background/95 border-muted/50">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-bold">WELCOME TO DOMA AI</CardTitle>
           <CardDescription>Sign in to get your Oil & Gas queries answered</CardDescription>
