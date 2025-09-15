@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
-import { X, User, Mail, Calendar, Save } from 'lucide-react';
+import { ArrowLeft, User, Mail, Settings, HelpCircle, LogOut, Crown, Edit3, Check, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
@@ -11,10 +9,11 @@ import { useToast } from '@/hooks/use-toast';
 
 export default function Profile() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { profile, loading, updating, updateProfile } = useProfile();
   const { toast } = useToast();
   const [fullName, setFullName] = useState('');
+  const [isEditingName, setIsEditingName] = useState(false);
 
   // Update full name when profile loads
   useEffect(() => {
@@ -37,8 +36,35 @@ export default function Profile() {
         title: "Success",
         description: "Profile updated successfully!",
       });
+      setIsEditingName(false);
     }
   };
+
+  const handleSignOut = async () => {
+    await signOut();
+    navigate('/auth');
+  };
+
+  const menuItems = [
+    { 
+      icon: Settings, 
+      label: 'Settings', 
+      action: () => navigate('/settings'),
+      hasArrow: true 
+    },
+    { 
+      icon: HelpCircle, 
+      label: 'Help & Support', 
+      action: () => {},
+      hasArrow: true 
+    },
+    { 
+      icon: LogOut, 
+      label: 'Log out', 
+      action: handleSignOut,
+      hasArrow: false 
+    }
+  ];
 
   if (loading) {
     return (
@@ -52,77 +78,128 @@ export default function Profile() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-2xl mx-auto p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-semibold">Profile</h1>
+      <div className="max-w-md mx-auto">
+        {/* Header */}
+        <div className="flex items-center p-4 border-b border-border">
           <Button
             variant="ghost"
             size="icon"
             onClick={() => navigate('/')}
-            className="h-8 w-8"
+            className="mr-3 h-8 w-8"
           >
-            <X className="h-4 w-4" />
+            <ArrowLeft className="h-4 w-4" />
           </Button>
+          <h1 className="text-lg font-semibold">Profile</h1>
         </div>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5" />
-              Personal Information
-            </CardTitle>
-            <CardDescription>
-              Manage your account details and preferences
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4 text-muted-foreground" />
-                <Input
-                  id="email"
-                  value={user?.email || ''}
-                  disabled
-                  className="flex-1"
-                />
+        <div className="p-4">
+          {/* User Info Section */}
+          <div className="mb-6">
+            <div className="flex items-center gap-3 p-4 rounded-lg bg-card border border-border">
+              <div className="flex-shrink-0">
+                <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+                  <User className="h-5 w-5 text-primary" />
+                </div>
               </div>
-              <p className="text-xs text-muted-foreground">
-                Your email address cannot be changed
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="fullName">Full Name</Label>
-              <Input
-                id="fullName"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="Enter your full name"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Account Created</Label>
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">
-                  {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}
-                </span>
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-1">
+                  {isEditingName ? (
+                    <div className="flex items-center gap-2 w-full">
+                      <Input
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        className="text-sm h-8"
+                        placeholder="Enter your name"
+                      />
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-6 w-6"
+                        onClick={handleSaveProfile}
+                        disabled={updating}
+                      >
+                        <Check className="h-3 w-3" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-6 w-6"
+                        onClick={() => {
+                          setIsEditingName(false);
+                          setFullName(profile?.full_name || '');
+                        }}
+                      >
+                        <X className="h-3 w-3" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <>
+                      <span className="font-medium text-sm truncate">
+                        {profile?.full_name || 'No name set'}
+                      </span>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-6 w-6 flex-shrink-0"
+                        onClick={() => setIsEditingName(true)}
+                      >
+                        <Edit3 className="h-3 w-3" />
+                      </Button>
+                    </>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <Mail className="h-3 w-3 text-muted-foreground flex-shrink-0" />
+                  <span className="text-xs text-muted-foreground truncate">
+                    {user?.email}
+                  </span>
+                </div>
               </div>
             </div>
+          </div>
 
-            <div className="flex justify-end pt-4">
-              <Button 
-                onClick={handleSaveProfile}
-                disabled={updating || fullName === (profile?.full_name || '')}
+          {/* Menu Items */}
+          <div className="space-y-2 mb-6">
+            {menuItems.map((item, index) => (
+              <button
+                key={index}
+                onClick={item.action}
+                className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-accent transition-colors text-left"
               >
-                <Save className="h-4 w-4 mr-2" />
-                {updating ? 'Saving...' : 'Save Changes'}
+                <item.icon className="h-4 w-4 text-muted-foreground" />
+                <span className="flex-1 text-sm">{item.label}</span>
+                {item.hasArrow && (
+                  <ArrowLeft className="h-3 w-3 text-muted-foreground rotate-180" />
+                )}
+              </button>
+            ))}
+          </div>
+
+          {/* Plan Section */}
+          <div className="border-t border-border pt-4">
+            <div className="flex items-center justify-between p-3 rounded-lg bg-card border border-border">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-orange-500/10 rounded-full flex items-center justify-center">
+                  <Crown className="h-4 w-4 text-orange-500" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium">
+                      {profile?.full_name?.split(' ')[0] || 'User'}
+                    </span>
+                  </div>
+                  <span className="text-xs text-muted-foreground">Free Plan</span>
+                </div>
+              </div>
+              <Button
+                size="sm"
+                className="bg-primary hover:bg-primary/90 text-primary-foreground px-4 py-1.5 h-auto text-xs"
+              >
+                Upgrade
               </Button>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
     </div>
   );
