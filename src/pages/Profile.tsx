@@ -7,7 +7,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useProfile } from '@/hooks/useProfile';
 import { useToast } from '@/hooks/use-toast';
 
-export default function Profile() {
+const Profile = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
   const { profile, loading, updating, updateProfile } = useProfile();
@@ -203,4 +203,6 @@ export default function Profile() {
       </div>
     </div>
   );
-}
+};
+
+export default Profile;
