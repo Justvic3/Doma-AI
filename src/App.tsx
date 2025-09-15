@@ -7,8 +7,10 @@ import { AuthProvider } from "@/hooks/useAuth";
 import Index from "./pages/Index";
 import Auth from "./pages/Auth";
 import Settings from "./pages/Settings";
-import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+
+// Properly import Profile component
+import Profile from "./pages/Profile";
 
 const queryClient = new QueryClient();
 

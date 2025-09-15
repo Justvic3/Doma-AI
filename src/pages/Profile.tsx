@@ -1,44 +1,11 @@
-import { useState, useEffect } from 'react';
-import { ArrowLeft, User, Mail, Settings, HelpCircle, LogOut, Crown, Edit3, Check, X } from 'lucide-react';
+import { ArrowLeft, User, Mail, Settings, HelpCircle, LogOut, Crown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
-import { useProfile } from '@/hooks/useProfile';
-import { useToast } from '@/hooks/use-toast';
 
 const Profile = () => {
   const navigate = useNavigate();
   const { user, signOut } = useAuth();
-  const { profile, loading, updating, updateProfile } = useProfile();
-  const { toast } = useToast();
-  const [fullName, setFullName] = useState('');
-  const [isEditingName, setIsEditingName] = useState(false);
-
-  // Update full name when profile loads
-  useEffect(() => {
-    if (profile?.full_name) {
-      setFullName(profile.full_name);
-    }
-  }, [profile]);
-
-  const handleSaveProfile = async () => {
-    const { error } = await updateProfile({ full_name: fullName });
-    
-    if (error) {
-      toast({
-        title: "Error",
-        description: "Failed to update profile. Please try again.",
-        variant: "destructive",
-      });
-    } else {
-      toast({
-        title: "Success",
-        description: "Profile updated successfully!",
-      });
-      setIsEditingName(false);
-    }
-  };
 
   const handleSignOut = async () => {
     await signOut();
@@ -65,16 +32,6 @@ const Profile = () => {
       hasArrow: false 
     }
   ];
-
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <p className="text-xl text-muted-foreground">Loading profile...</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -103,55 +60,14 @@ const Profile = () => {
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-1">
-                  {isEditingName ? (
-                    <div className="flex items-center gap-2 w-full">
-                      <Input
-                        value={fullName}
-                        onChange={(e) => setFullName(e.target.value)}
-                        className="text-sm h-8"
-                        placeholder="Enter your name"
-                      />
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-6 w-6"
-                        onClick={handleSaveProfile}
-                        disabled={updating}
-                      >
-                        <Check className="h-3 w-3" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-6 w-6"
-                        onClick={() => {
-                          setIsEditingName(false);
-                          setFullName(profile?.full_name || '');
-                        }}
-                      >
-                        <X className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <>
-                      <span className="font-medium text-sm truncate">
-                        {profile?.full_name || 'No name set'}
-                      </span>
-                      <Button
-                        size="icon"
-                        variant="ghost"
-                        className="h-6 w-6 flex-shrink-0"
-                        onClick={() => setIsEditingName(true)}
-                      >
-                        <Edit3 className="h-3 w-3" />
-                      </Button>
-                    </>
-                  )}
+                  <span className="font-medium text-sm truncate">
+                    User Profile
+                  </span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Mail className="h-3 w-3 text-muted-foreground flex-shrink-0" />
                   <span className="text-xs text-muted-foreground truncate">
-                    {user?.email}
+                    {user?.email || 'No email'}
                   </span>
                 </div>
               </div>
@@ -184,9 +100,7 @@ const Profile = () => {
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium">
-                      {profile?.full_name?.split(' ')[0] || 'User'}
-                    </span>
+                    <span className="text-sm font-medium">User</span>
                   </div>
                   <span className="text-xs text-muted-foreground">Free Plan</span>
                 </div>
