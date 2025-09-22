@@ -40,7 +40,7 @@ serve(async (req) => {
     console.log('Calling Hugging Face model with prompt:', prompt);
 
     const response = await fetch(
-      'https://api-inference.huggingface.co/models/PurpleKnight234/finetuned_eiamodel',
+      'https://api-inference.huggingface.co/models/gpt2',
       {
         method: 'POST',
         headers: {
