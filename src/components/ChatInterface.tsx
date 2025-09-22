@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { FileUpload } from '@/components/FileUpload';
 import { VoiceRecorder } from '@/components/VoiceRecorder';
 import { getRandomOilGasContent } from '@/utils/oilGasContent';
+import { supabase } from '@/integrations/supabase/client';
 
 interface Message {
   id: string;
@@ -33,9 +34,10 @@ export function ChatInterface({ chatHistory, onChatHistoryUpdate }: ChatInterfac
   const [currentContent, setCurrentContent] = useState(() => getRandomOilGasContent());
   const [uploadedFiles, setUploadedFiles] = useState<any[]>([]);
   const [isFileDialogOpen, setIsFileDialogOpen] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
 
-  const handleSend = () => {
-    if (message.trim()) {
+  const handleSend = async () => {
+    if (message.trim() && !isGenerating) {
       const newMessage: Message = {
         id: Date.now().toString(),
         content: message.trim(),
@@ -47,15 +49,26 @@ export function ChatInterface({ chatHistory, onChatHistoryUpdate }: ChatInterfac
       setMessages(updatedMessages);
       setMessage('');
       setIsNewChat(false);
+      setIsGenerating(true);
       
-      // Simulate AI response after a short delay
-      setTimeout(() => {
+      try {
+        // Call the Hugging Face model via edge function
+        const { data, error } = await supabase.functions.invoke('text-generation', {
+          body: { prompt: newMessage.content }
+        });
+
+        if (error) {
+          console.error('Error calling text generation:', error);
+          throw new Error(error.message || 'Failed to generate response');
+        }
+
         const aiResponse: Message = {
           id: (Date.now() + 1).toString(),
-          content: "I'm here to help with your Oil & Gas operations. What specific challenge are you facing today?",
+          content: data.generatedText || "I'm here to help with your Oil & Gas operations. What specific challenge are you facing today?",
           timestamp: new Date(),
           sender: 'ai'
         };
+        
         const finalMessages = [...updatedMessages, aiResponse];
         setMessages(finalMessages);
         
@@ -68,7 +81,19 @@ export function ChatInterface({ chatHistory, onChatHistoryUpdate }: ChatInterfac
           );
           onChatHistoryUpdate(updatedHistory);
         }
-      }, 1000);
+      } catch (error) {
+        console.error('Error generating AI response:', error);
+        const errorResponse: Message = {
+          id: (Date.now() + 1).toString(),
+          content: "I apologize, but I'm having trouble generating a response right now. Please try again in a moment.",
+          timestamp: new Date(),
+          sender: 'ai'
+        };
+        const finalMessages = [...updatedMessages, errorResponse];
+        setMessages(finalMessages);
+      } finally {
+        setIsGenerating(false);
+      }
     }
   };
 
@@ -253,9 +278,16 @@ export function ChatInterface({ chatHistory, onChatHistoryUpdate }: ChatInterfac
                   onClick={handleSend} 
                   size="sm" 
                   className="h-8 w-8 p-0 bg-primary hover:bg-primary/90"
+                  disabled={isGenerating}
                 >
                   <Send className="h-4 w-4" />
                 </Button>
+              )}
+              {isGenerating && (
+                <div className="flex items-center text-xs text-muted-foreground mr-2">
+                  <div className="animate-spin rounded-full h-3 w-3 border-b-2 border-primary mr-1"></div>
+                  Generating...
+                </div>
               )}
             </div>
           </div>
