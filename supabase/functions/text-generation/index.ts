@@ -40,7 +40,7 @@ serve(async (req) => {
     console.log('Calling Hugging Face model with prompt:', prompt);
 
     const response = await fetch(
-      'https://api-inference.huggingface.co/models/gpt2',
+      'https://api-inference.huggingface.co/models/meta-llama/Llama-3.2-3B-Instruct',
       {
         method: 'POST',
         headers: {
@@ -50,10 +50,11 @@ serve(async (req) => {
         body: JSON.stringify({
           inputs: prompt,
           parameters: {
-            max_new_tokens: 150,
+            max_new_tokens: 200,
             temperature: 0.7,
             do_sample: true,
-            return_full_text: false
+            return_full_text: false,
+            stop: ["<|eot_id|>"]
           }
         }),
       }
