@@ -50,11 +50,9 @@ serve(async (req) => {
         body: JSON.stringify({
           inputs: prompt,
           parameters: {
-            max_new_tokens: 200,
+            max_new_tokens: 150,
             temperature: 0.7,
-            do_sample: true,
-            return_full_text: false,
-            stop: ["<|eot_id|>"]
+            return_full_text: false
           }
         }),
       }
@@ -62,7 +60,22 @@ serve(async (req) => {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Hugging Face API error:', response.status, errorText);
+      console.error('Hugging Face API error:', response.status, response.statusText, errorText);
+      console.error('Request URL:', 'https://api-inference.huggingface.co/models/meta-llama/Llama-3.2-3B-Instruct');
+      console.error('Request headers:', {
+        'Authorization': `Bearer ${huggingFaceToken?.substring(0, 10)}...`,
+        'Content-Type': 'application/json',
+      });
+      console.error('Request body:', JSON.stringify({
+        inputs: prompt,
+        parameters: {
+          max_new_tokens: 200,
+          temperature: 0.7,
+          do_sample: true,
+          return_full_text: false,
+          stop: ["<|eot_id|>"]
+        }
+      }));
       
       if (response.status === 503) {
         return new Response(
@@ -75,7 +88,7 @@ serve(async (req) => {
       }
       
       return new Response(
-        JSON.stringify({ error: 'Failed to generate text' }),
+        JSON.stringify({ error: `Failed to generate text: ${response.status} ${errorText}` }),
         { 
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 500 
