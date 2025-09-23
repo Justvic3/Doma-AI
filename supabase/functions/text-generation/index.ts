@@ -24,10 +24,10 @@ serve(async (req) => {
       );
     }
 
-    const huggingFaceToken = Deno.env.get('HUGGING_FACE_ACCESS_TOKEN');
+    const deepseekApiKey = Deno.env.get('DEEPSEEK_API_KEY');
     
-    if (!huggingFaceToken) {
-      console.error('HUGGING_FACE_ACCESS_TOKEN not found');
+    if (!deepseekApiKey) {
+      console.error('DEEPSEEK_API_KEY not found');
       return new Response(
         JSON.stringify({ error: 'API token not configured' }),
         { 
@@ -37,42 +37,48 @@ serve(async (req) => {
       );
     }
 
-    console.log('Calling Hugging Face model with prompt:', prompt);
+    console.log('Calling DeepSeek V3 model with prompt:', prompt);
 
     const response = await fetch(
-      'https://api-inference.huggingface.co/models/microsoft/DialoGPT-small',
+      'https://api.deepseek.com/chat/completions',
       {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${huggingFaceToken}`,
+          'Authorization': `Bearer ${deepseekApiKey}`,
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          inputs: prompt,
-          parameters: {
-            max_new_tokens: 100,
-            temperature: 0.7,
-            do_sample: true
-          }
+          model: 'deepseek-chat',
+          messages: [
+            {
+              role: 'user',
+              content: prompt
+            }
+          ],
+          max_tokens: 100,
+          temperature: 0.7
         }),
       }
     );
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Hugging Face API error:', response.status, response.statusText, errorText);
-      console.error('Request URL:', 'https://api-inference.huggingface.co/models/microsoft/DialoGPT-small');
+      console.error('DeepSeek API error:', response.status, response.statusText, errorText);
+      console.error('Request URL:', 'https://api.deepseek.com/chat/completions');
       console.error('Request headers:', {
-        'Authorization': `Bearer ${huggingFaceToken?.substring(0, 10)}...`,
+        'Authorization': `Bearer ${deepseekApiKey?.substring(0, 10)}...`,
         'Content-Type': 'application/json',
       });
       console.error('Request body:', JSON.stringify({
-        inputs: prompt,
-        parameters: {
-          max_new_tokens: 100,
-          temperature: 0.7,
-          do_sample: true
-        }
+        model: 'deepseek-chat',
+        messages: [
+          {
+            role: 'user',
+            content: prompt
+          }
+        ],
+        max_tokens: 100,
+        temperature: 0.7
       }));
       
       if (response.status === 503) {
@@ -95,14 +101,12 @@ serve(async (req) => {
     }
 
     const result = await response.json();
-    console.log('Hugging Face response:', result);
+    console.log('DeepSeek response:', result);
 
-    // Extract the generated text
+    // Extract the generated text from DeepSeek's OpenAI-compatible response
     let generatedText = '';
-    if (Array.isArray(result) && result.length > 0) {
-      generatedText = result[0].generated_text || '';
-    } else if (result.generated_text) {
-      generatedText = result.generated_text;
+    if (result.choices && result.choices.length > 0 && result.choices[0].message) {
+      generatedText = result.choices[0].message.content || '';
     } else {
       generatedText = 'I apologize, but I encountered an issue generating a response. Please try again.';
     }
