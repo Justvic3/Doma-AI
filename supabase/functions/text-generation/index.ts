@@ -40,7 +40,7 @@ serve(async (req) => {
     console.log('Calling Hugging Face model with prompt:', prompt);
 
     const response = await fetch(
-      'https://api-inference.huggingface.co/models/Qwen/Qwen3-Omni-30B-A3B-Instruct',
+      'https://api-inference.huggingface.co/models/google/flan-t5-base',
       {
         method: 'POST',
         headers: {
@@ -50,9 +50,9 @@ serve(async (req) => {
         body: JSON.stringify({
           inputs: prompt,
           parameters: {
-            max_new_tokens: 150,
+            max_new_tokens: 100,
             temperature: 0.7,
-            return_full_text: false
+            do_sample: true
           }
         }),
       }
@@ -61,7 +61,7 @@ serve(async (req) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Hugging Face API error:', response.status, response.statusText, errorText);
-      console.error('Request URL:', 'https://api-inference.huggingface.co/models/Qwen/Qwen3-Omni-30B-A3B-Instruct');
+      console.error('Request URL:', 'https://api-inference.huggingface.co/models/google/flan-t5-base');
       console.error('Request headers:', {
         'Authorization': `Bearer ${huggingFaceToken?.substring(0, 10)}...`,
         'Content-Type': 'application/json',
@@ -69,11 +69,9 @@ serve(async (req) => {
       console.error('Request body:', JSON.stringify({
         inputs: prompt,
         parameters: {
-          max_new_tokens: 200,
+          max_new_tokens: 100,
           temperature: 0.7,
-          do_sample: true,
-          return_full_text: false,
-          stop: ["<|eot_id|>"]
+          do_sample: true
         }
       }));
       
