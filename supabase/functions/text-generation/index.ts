@@ -40,7 +40,7 @@ serve(async (req) => {
     console.log('Calling Hugging Face model with prompt:', prompt);
 
     const response = await fetch(
-      'https://api-inference.huggingface.co/models/google/flan-t5-base',
+      'https://api-inference.huggingface.co/models/microsoft/DialoGPT-small',
       {
         method: 'POST',
         headers: {
@@ -61,7 +61,7 @@ serve(async (req) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Hugging Face API error:', response.status, response.statusText, errorText);
-      console.error('Request URL:', 'https://api-inference.huggingface.co/models/google/flan-t5-base');
+      console.error('Request URL:', 'https://api-inference.huggingface.co/models/microsoft/DialoGPT-small');
       console.error('Request headers:', {
         'Authorization': `Bearer ${huggingFaceToken?.substring(0, 10)}...`,
         'Content-Type': 'application/json',
