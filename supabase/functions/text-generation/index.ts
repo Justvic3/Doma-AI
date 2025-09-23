@@ -40,7 +40,7 @@ serve(async (req) => {
     console.log('Calling Hugging Face model with prompt:', prompt);
 
     const response = await fetch(
-      'https://api-inference.huggingface.co/models/gpt2',
+      'https://api-inference.huggingface.co/models/Qwen/Qwen3-Omni-30B-A3B-Instruct',
       {
         method: 'POST',
         headers: {
@@ -61,7 +61,7 @@ serve(async (req) => {
     if (!response.ok) {
       const errorText = await response.text();
       console.error('Hugging Face API error:', response.status, response.statusText, errorText);
-      console.error('Request URL:', 'https://api-inference.huggingface.co/models/gpt2');
+      console.error('Request URL:', 'https://api-inference.huggingface.co/models/Qwen/Qwen3-Omni-30B-A3B-Instruct');
       console.error('Request headers:', {
         'Authorization': `Bearer ${huggingFaceToken?.substring(0, 10)}...`,
         'Content-Type': 'application/json',
